@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Favorites - QuotesVault</title>
+    <meta name="description" content="View all your saved favorite quotes in one place.">
+    <meta name="robots" content="noindex, follow">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/dark-mode.css">
+    <link rel="stylesheet" href="/css/animations.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo"><a href="/"><h1>QuotesVault</h1></a></div>
+                <div class="nav-menu" id="navMenu">
+                    <ul class="nav-links">
+                        <li><a href="/">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle">Categories ▼</a>
+                            <div class="dropdown-menu">
+                                <a href="/categories/motivational/">Motivational</a>
+                                <a href="/categories/love/">Love</a>
+                                <a href="/categories/friendship/">Friendship</a>
+                            </div>
+                        </li>
+                        <li><a href="/pages/favorites.html" class="active">Favorites</a></li>
+                        <li><a href="/pages/about.html">About</a></li>
+                        <li><a href="/pages/contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="nav-actions">
+                    <button class="search-btn" id="searchBtn">🔍</button>
+                    <button class="theme-toggle" id="themeToggle">🌙</button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle"><span></span><span></span><span></span></button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-header" style="padding: 60px 0; background: var(--gradient-secondary); color: white; text-align: center;">
+        <div class="container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 15px;">❤️ My Favorites</h1>
+            <p style="font-size: 1.125rem; opacity: 0.9;">Your saved quotes collection</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div id="favoritesCount" style="text-align: center; margin-bottom: 30px; font-size: 1.125rem; color: var(--text-secondary);"></div>
+            
+            <div id="favoritesGrid" class="quotes-grid">
+                <!-- Favorites will be loaded here -->
+            </div>
+
+            <div id="emptyState" style="display: none; text-align: center; padding: 60px 20px;">
+                <div style="font-size: 5rem; margin-bottom: 20px;">💔</div>
+                <h2 style="font-size: 2rem; margin-bottom: 15px; color: var(--text-primary);">No Favorites Yet</h2>
+                <p style="font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 30px;">Start adding quotes to your favorites by clicking the heart icon!</p>
+                <a href="/" style="display: inline-block; padding: 15px 40px; background: var(--gradient-primary); color: white; border-radius: 50px; font-weight: 600; text-decoration: none;">Browse Quotes</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 QuotesVault. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/theme.js"></script>
+    <script>
+        async function loadFavorites() {
+            const favoriteIds = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            const emptyState = document.getElementById('emptyState');
+            const favoritesCount = document.getElementById('favoritesCount');
+            
+            if (favoriteIds.length === 0) {
+                favoritesGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            favoritesCount.textContent = `${favoriteIds.length} favorite quote${favoriteIds.length > 1 ? 's' : ''}`;
+            
+            try {
+                const response = await fetch('/data/quotes.json');
+                const data = await response.json();
+                const favoriteQuotes = data.quotes.filter(q => favoriteIds.includes(q.id));
+                
+                favoritesGrid.innerHTML = '';
+                const gradients = ['gradient-1', 'gradient-2', 'gradient-3', 'gradient-4', 'gradient-5', 'gradient-6'];
+                
+                favoriteQuotes.forEach((quote, index) => {
+                    const card = document.createElement('div');
+                    card.className = `quote-card ${gradients[index % 6]}`;
+                    card.innerHTML = `
+                        <div class="quote-meta">
+                            <span class="quote-category">${formatCategory(quote.category)}</span>
+                        </div>
+                        <blockquote class="quote-text">"${quote.text}"</blockquote>
+                        <cite class="quote-author">— ${quote.author}</cite>
+                        <div class="quote-actions">
+                            <button onclick="copyQuoteText('${quote.id}')">Copy</button>
+                            <button onclick="removeFromFavorites('${quote.id}')">Remove ❤️</button>
+                        </div>
+                    `;
+                    favoritesGrid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+            }
+        }
+        
+        function formatCategory(cat) {
+            return cat.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+        }
+        
+        async function copyQuoteText(quoteId) {
+            try {
+                const response = await fetch('/data/quotes.json');
+                const data = await response.json();
+                const quote = data.quotes.find(q => q.id === quoteId);
+                if (quote) {
+                    await navigator.clipboard.writeText(`"${quote.text}" — ${quote.author}`);
+                    showToast('Quote copied to clipboard!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function removeFromFavorites(quoteId) {
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const newFavorites = favorites.filter(id => id !== quoteId);
+            localStorage.setItem('favorites', JSON.stringify(newFavorites));
+            showToast('Removed from favorites');
+            loadFavorites();
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.cssText = 'position: fixed; bottom: 30px; right: 30px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; z-index: 10000;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadFavorites);
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# robots.txt for QuotesVault
+
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Disallow admin or private areas (if any)
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+
+# Specific crawl-delay for various bots (optional)
+# User-agent: Googlebot
+# Crawl-delay: 0
+
+# User-agent: Yandex
+# Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://yoursite.com/sitemap.xml
+
+# Additional sitemaps (if you create category-specific sitemaps)
+# Sitemap: https://yoursite.com/sitemap-categories.xml
+# Sitemap: https://yoursite.com/sitemap-quotes.xml

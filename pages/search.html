@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Quotes - QuotesVault</title>
+    <meta name="description" content="Search through 500+ quotes by keyword, author, or category.">
+    <meta name="robots" content="noindex, follow">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/dark-mode.css">
+    <link rel="stylesheet" href="/css/animations.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo"><a href="/"><h1>QuotesVault</h1></a></div>
+                <div class="nav-menu" id="navMenu">
+                    <ul class="nav-links">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/pages/favorites.html">Favorites</a></li>
+                        <li><a href="/pages/about.html">About</a></li>
+                        <li><a href="/pages/contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">🌙</button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle"><span></span><span></span><span></span></button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-header" style="padding: 60px 0; background: var(--gradient-accent); color: white; text-align: center;">
+        <div class="container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 30px;">🔍 Search Quotes</h1>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <input type="text" id="searchInput" placeholder="Search by keyword, author, or category..." 
+                       style="width: 100%; padding: 15px 20px; border: none; border-radius: 50px; font-size: 1.125rem; outline: none;">
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div id="searchInfo" style="text-align: center; margin-bottom: 30px; font-size: 1.125rem; color: var(--text-secondary);"></div>
+            
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
+                <button onclick="filterBy('all')" class="filter-btn active">All</button>
+                <button onclick="filterBy('trending')">Trending</button>
+                <button onclick="filterBy('motivational')">Motivational</button>
+                <button onclick="filterBy('love')">Love</button>
+                <button onclick="filterBy('inspirational')">Inspirational</button>
+            </div>
+            
+            <div id="searchResults" class="quotes-grid">
+                <!-- Results will appear here -->
+            </div>
+
+            <div id="noResults" style="display: none; text-align: center; padding: 60px 20px;">
+                <div style="font-size: 5rem; margin-bottom: 20px;">🔍</div>
+                <h2 style="font-size: 2rem; margin-bottom: 15px; color: var(--text-primary);">No Quotes Found</h2>
+                <p style="font-size: 1.125rem; color: var(--text-secondary);">Try different keywords or browse our categories</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 QuotesVault. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/theme.js"></script>
+    <script>
+        let allQuotes = [];
+        let currentFilter = 'all';
+        
+        async function loadQuotes() {
+            const response = await fetch('/data/quotes.json');
+            const data = await response.json();
+            allQuotes = data.quotes;
+            displayQuotes(allQuotes);
+        }
+        
+        function displayQuotes(quotes) {
+            const resultsGrid = document.getElementById('searchResults');
+            const noResults = document.getElementById('noResults');
+            const searchInfo = document.getElementById('searchInfo');
+            
+            if (quotes.length === 0) {
+                resultsGrid.style.display = 'none';
+                noResults.style.display = 'block';
+                searchInfo.textContent = '';
+                return;
+            }
+            
+            resultsGrid.style.display = 'grid';
+            noResults.style.display = 'none';
+            searchInfo.textContent = `Found ${quotes.length} quote${quotes.length > 1 ? 's' : ''}`;
+            
+            resultsGrid.innerHTML = '';
+            const gradients = ['gradient-1', 'gradient-2', 'gradient-3', 'gradient-4', 'gradient-5', 'gradient-6'];
+            
+            quotes.forEach((quote, index) => {
+                const card = document.createElement('div');
+                card.className = `quote-card ${gradients[index % 6]}`;
+                card.innerHTML = `
+                    <div class="quote-meta">
+                        <span class="quote-category">${formatCategory(quote.category)}</span>
+                    </div>
+                    <blockquote class="quote-text">"${quote.text}"</blockquote>
+                    <cite class="quote-author">— ${quote.author}</cite>
+                    <div class="quote-actions">
+                        <button onclick="copyQuote('${quote.id}')">Copy</button>
+                        <button onclick="shareQuote('${quote.id}')">Share</button>
+                    </div>
+                `;
+                resultsGrid.appendChild(card);
+            });
+        }
+        
+        function formatCategory(cat) {
+            return cat.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+        }
+        
+        function searchQuotes(query) {
+            const lowercaseQuery = query.toLowerCase();
+            let filtered = allQuotes;
+            
+            if (currentFilter !== 'all') {
+                if (currentFilter === 'trending') {
+                    filtered = allQuotes.filter(q => q.isTrending);
+                } else {
+                    filtered = allQuotes.filter(q => q.category === currentFilter);
+                }
+            }
+            
+            if (query) {
+                filtered = filtered.filter(quote => 
+                    quote.text.toLowerCase().includes(lowercaseQuery) ||
+                    quote.author.toLowerCase().includes(lowercaseQuery) ||
+                    quote.category.toLowerCase().includes(lowercaseQuery) ||
+                    quote.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+                );
+            }
+            
+            displayQuotes(filtered);
+        }
+        
+        function filterBy(filter) {
+            currentFilter = filter;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'var(--bg-secondary)';
+                btn.style.color = 'var(--text-primary)';
+            });
+            event.target.classList.add('active');
+            event.target.style.background = 'var(--primary)';
+            event.target.style.color = 'white';
+            
+            const searchInput = document.getElementById('searchInput');
+            searchQuotes(searchInput.value);
+        }
+        
+        async function copyQuote(quoteId) {
+            const quote = allQuotes.find(q => q.id === quoteId);
+            if (quote) {
+                await navigator.clipboard.writeText(`"${quote.text}" — ${quote.author}`);
+                showToast('Quote copied!');
+            }
+        }
+        
+        function shareQuote(quoteId) {
+            const quote = allQuotes.find(q => q.id === quoteId);
+            if (quote && navigator.share) {
+                navigator.share({
+                    title: 'QuotesVault',
+                    text: `"${quote.text}" — ${quote.author}`,
+                    url: window.location.href
+                });
+            }
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.cssText = 'position: fixed; bottom: 30px; right: 30px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; z-index: 10000;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuotes(e.target.value);
+        });
+        
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlQuery = urlParams.get('q');
+        const urlFilter = urlParams.get('filter');
+        
+        if (urlQuery) {
+            document.getElementById('searchInput').value = urlQuery;
+        }
+        if (urlFilter && ['trending', 'latest'].includes(urlFilter)) {
+            currentFilter = urlFilter;
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadQuotes);
+        
+        // Add CSS for filter buttons
+        const style = document.createElement('style');
+        style.textContent = `.filter-btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: var(--transition); background: var(--bg-secondary); } .filter-btn.active { background: var(--primary); color: white; }`;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+/* ===================================
+   Dark Mode Styles
+   =================================== */
+
+body.dark-mode {
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #374151;
+  --border: #374151;
+}
+
+/* Header */
+body.dark-mode .site-header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Search */
+body.dark-mode #searchInput {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+body.dark-mode #searchResults {
+  background-color: var(--bg-secondary);
+}
+
+/* Quote Cards in Dark Mode */
+body.dark-mode .quote-card {
+  /* Keep gradient backgrounds for visual appeal */
+}
+
+/* Category Cards */
+body.dark-mode .category-card {
+  /* Keep gradient backgrounds */
+}
+
+/* Newsletter */
+body.dark-mode .newsletter-form input {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Dropdown Menu */
+body.dark-mode .dropdown-menu {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+}
+
+/* Ad Containers */
+body.dark-mode .ad-container {
+  background-color: var(--bg-tertiary);
+}
+
+/* Sections */
+body.dark-mode .trending-section {
+  background-color: var(--bg-secondary);
+}
+
+body.dark-mode .latest-section {
+  background-color: var(--bg-primary);
+}
+
+/* View All Links */
+body.dark-mode .view-all:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Loading Spinner */
+body.dark-mode .loading-spinner {
+  border-color: var(--bg-tertiary);
+  border-top-color: var(--primary-light);
+}
+
+/* Success Message */
+body.dark-mode .success-message {
+  background-color: #059669;
+}
+
+/* Smooth Transition for Theme Change */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.site-header,
+.dropdown-menu,
+.ad-container,
+.trending-section,
+.latest-section {
+  transition: background-color 0.3s ease;
+}

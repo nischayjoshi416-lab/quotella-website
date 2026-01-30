@@ -1,0 +1,8 @@
+# ads.txt file for QuotesVault
+# Replace pub-XXXXXXXXXX with your actual AdSense Publisher ID
+
+google.com, pub-XXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+# Additional ad networks can be added here
+# Example:
+# partnername.com, partnerid, DIRECT/RESELLER, partnerverificationid
